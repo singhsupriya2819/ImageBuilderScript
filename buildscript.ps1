@@ -351,7 +351,7 @@ param(
    }
 
 #Function 30   
-Function SoftwarePolicies   
+Function DisableShutDownEventPopUp   
 {
     New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\" -Name "Reliability" –Force
     New-ItemProperty -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Reliability' `
@@ -380,4 +380,5 @@ DisableServerMgrNetworkPopup
 CreateLabFilesDirectory
 DisableWindowsFirewall
 InstallEdgeChromium
+DisableShutDownEventPopUp
 }
