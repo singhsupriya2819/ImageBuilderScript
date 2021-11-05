@@ -1,4 +1,4 @@
-#Function1 - Disable Enhanced Security for Internet Explorer
+#Function 1 -Disable Enhanced Security for Internet Explorer
 Function Disable-InternetExplorerESC
 {
     $AdminKey = "HKLM:\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A7-37EF-4b3f-8CFC-4F3A74704073}"
@@ -9,7 +9,7 @@ Function Disable-InternetExplorerESC
     Write-Host "IE Enhanced Security Configuration (ESC) has been disabled." -ForegroundColor Green -Verbose
 }
 
-#Function2 - Enable File Download on Windows Server Internet Explorer
+#Function 2 -Enable File Download on Windows Server Internet Explorer
 Function Enable-IEFileDownload
 {
     $HKLM = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings\Zones\3"
@@ -20,7 +20,7 @@ Function Enable-IEFileDownload
     Set-ItemProperty -Path $HKCU -Name "1604" -Value 0 -ErrorAction SilentlyContinue -Verbose
 }
 
-#Function3 - Enable Copy Page Content in IE
+#Function 3 -Enable Copy Page Content in IE
 Function Enable-CopyPageContent-In-InternetExplorer
 {
     $HKLM = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings\Zones\3"
@@ -29,8 +29,8 @@ Function Enable-CopyPageContent-In-InternetExplorer
     Set-ItemProperty -Path $HKCU -Name "1407" -Value 0 -ErrorAction SilentlyContinue -Verbose
 }
 
-#Function Install Chocolatey
-Function4 InstallChocolatey
+#Function 4 -Install Chocolatey
+Function InstallChocolatey
 {   
     #[Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls
     #[Net.ServicePointManager]::SecurityProtocol = "tls12, tls11, tls" 
@@ -40,7 +40,7 @@ Function4 InstallChocolatey
 
 }
 
-#Function5 Disable PopUp for network configuration
+#Function 5 -Disable PopUp for network configuration
 
 Function DisableServerMgrNetworkPopup
 {
@@ -50,20 +50,20 @@ Function DisableServerMgrNetworkPopup
     Get-ScheduledTask -TaskName ServerManager | Disable-ScheduledTask -Verbose
 }
 
-#Function6
+#Function 6
 Function CreateLabFilesDirectory
 {
     New-Item -ItemType directory -Path C:\LabFiles -force
 }
 
-#Function7
+#Function 7
 Function DisableWindowsFirewall
 {
     Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled False
 
 }
 
-#Function8
+#Function 8
 Function Show-File-Extension
 {
     $key = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
@@ -73,14 +73,14 @@ Function Show-File-Extension
 
 
 
-#Function9 - InstallPowerBIDesktop
+#Function 9 -InstallPowerBIDesktop
 Function InstallPowerBiDesktopChoco
 {
     choco install powerbi -y -force
 
 }
 
-#Function10
+#Function 10
 Function Enable-CloudLabsEmbeddedShadow($vmAdminUsername, $trainerUserName, [SecureString] $trainerUserPassword)
 {
 Write-Host "Enabling CloudLabsEmbeddedShadow"
@@ -123,7 +123,7 @@ $Action= New-ScheduledTaskAction -Execute "C:\Windows\System32\WindowsPowerShell
 Register-ScheduledTask -TaskName "shadowshortcut" -Trigger $Trigger -User $User -Action $Action -RunLevel Highest -Force
 }
 
-#Function11 Create Azure Credential File on Desktop
+#Function 11 -Create Azure Credential File on Desktop
 Function CreateCredFile($AzureUserName, [SecureString] $AzurePassword, $AzureTenantID, $AzureSubscriptionID, $DeploymentID)
 {
     $WebClient = New-Object System.Net.WebClient
@@ -147,7 +147,7 @@ Function CreateCredFile($AzureUserName, [SecureString] $AzurePassword, $AzureTen
     Copy-Item "C:\LabFiles\AzureCreds.txt" -Destination "C:\Users\Public\Desktop"
 }
 
-#Function12 Install Cloudlabs Modern VM (Windows Server 2012,2016,2019, Windows 10) Validator
+#Function 12 -Install Cloudlabs Modern VM (Windows Server 2012,2016,2019, Windows 10) Validator
 Function InstallModernVmValidator
 {   
     #Create C:\CloudLabs\Validator directory
@@ -160,7 +160,7 @@ Function InstallModernVmValidator
     cmd.exe --% /c sc start "Spektra CloudLabs VM Agent"
 }
 
-#Function13 Install Cloudlabs Legacy VM (Windows Server 2008R2) Validator
+#Function 13 -Install Cloudlabs Legacy VM (Windows Server 2008R2) Validator
 Function InstallLegacyVmValidator
 {
     #Create C:\CloudLabs
@@ -176,7 +176,7 @@ Function InstallLegacyVmValidator
 
 }
 
-#Function13 Install SQl Server Management studio
+#Function 14 -Install SQl Server Management studio
 Function InstallSQLSMS
 {
     choco install sql-server-management-studio -y -force
@@ -187,20 +187,20 @@ Function InstallSQLSMS
 
 }
 
-#Function14- Install Azure Powershell Az Module
+#Function 15 -Install Azure Powershell Az Module
 Function InstallAzPowerShellModule
 {
     choco install az.powershell -y -force
 
 }
 
-#Function 15
+#Function 16
 Function InstallAzCLI
 {
     choco install azure-cli -y -force
 }
 
-#Function 16
+#Function 17
 Function InstallGoogleChrome
 {
 
@@ -208,7 +208,7 @@ Function InstallGoogleChrome
 
 }
 
-#Function 17
+#Function 18
 Function InstallVSCode
 {
 
@@ -216,7 +216,7 @@ Function InstallVSCode
 
 }
 
-#Function 18
+#Function 19
 Function InstallGitTools
 {
 
@@ -224,7 +224,7 @@ Function InstallGitTools
 
 }
 
-#Function 19
+#Function 20
 Function InstallPutty
 {
 
@@ -232,7 +232,7 @@ Function InstallPutty
 
 }
 
-#Function 20
+#Function 21
 Function InstallAdobeReader
 {
 
@@ -240,7 +240,7 @@ Function InstallAdobeReader
 
 }
 
-#Function 21
+#Function 22
 
 Function InstallFirefox
 {
@@ -249,7 +249,7 @@ Function InstallFirefox
 
 }
 
-#Function 22
+#Function 23
 Function Install7Zip
 {
 
@@ -257,7 +257,7 @@ Function Install7Zip
 
 }
 
-#Function 23
+#Function 24
 Function Installvisualstudio2019community
 {
 
@@ -265,7 +265,7 @@ Function Installvisualstudio2019community
 
 }
 
-#Function 24
+#Function 25
 Function InstallEdgeChromium
 {
 
@@ -279,25 +279,17 @@ Function InstallEdgeChromium
 
 }
 
-
+#Function 26 -Install-dotnet3.1
 Function Install-dotnet3.1
 {
-
-    choco install dotnetcore-sdk -y -force
-
+$WebClient = New-Object System.Net.WebClient
+$WebClient.DownloadFile("https://experienceazure.blob.core.windows.net/software/dotnet-install.ps1","C:\Packages\dotnet-install.ps1")
+Set-Location C:\Packages
+./dotnet-install.ps1 -Channel 3.1 -Runtime dotnet -Version 3.1.4 -InstallDir 'C:\Program Files\dotnet'
 }
 
-#Function Install-dotnet3.1
-#{
-#$WebClient = New-Object System.Net.WebClient
-#$WebClient.DownloadFile("https://experienceazure.blob.core.windows.net/software/dotnet-install.ps1","C:\Packages\dotnet-install.ps1")
-#Set-Location C:\Packages
-#./dotnet-install.ps1 -Channel 3.1 -Runtime dotnet -Version 3.1.4 -InstallDir 'C:\Program Files\dotnet'
 
-#}
-
-
-#Function 25
+#Function 27
 Function InstallCloudLabsManualAgentFiles
 {
 #Download files to write deployment status
@@ -315,7 +307,7 @@ cmd.exe --% /c sc start "Spektra.CloudLabs.Agent"
 Start-Sleep 5 
 }
 
-#Function 26
+#Function 28
 Function SetDeploymentStatus{
    Param(
      [parameter(Mandatory=$true)]
@@ -328,7 +320,7 @@ Function SetDeploymentStatus{
    (Get-Content -Path "C:\WindowsAzure\Logs\validationstatus.txt") | ForEach-Object {$_ -Replace "ReplaceMessage", "$ManualStepMessage"} | Set-Content -Path "C:\WindowsAzure\Logs\validationstatus.txt"
      }
 
-#Function 27     
+#Function 29     
 Function CloudLabsManualAgent{
 <#
       SYNOPSIS
@@ -358,7 +350,7 @@ param(
     }       
    }
 
-#Function 28   
+#Function 30   
 Function SoftwarePolicies   
 {
     New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\" -Name "Reliability" –Force
@@ -375,7 +367,7 @@ Function SoftwarePolicies
                     -Force
 }                    
 
-#Function 29
+#Function 31
 Function WindowsServerCommon
 {
 [Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls
