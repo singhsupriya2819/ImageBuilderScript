@@ -1,0 +1,67 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "imageTemplateName": {
+      "type": "string"
+    },
+    "api-version": {
+      "type": "string"
+    },
+    "svclocation": {
+      "type": "string"
+    }
+  },
+  "variables": {},
+  "resources": [
+    {
+      "name": "[parameters('imageTemplateName')]",
+      "type": "Microsoft.VirtualMachineImages/imageTemplates",
+      "apiVersion": "[parameters('api-version')]",
+      "location": "[parameters('svclocation')]",
+      "dependsOn": [],
+      "tags": {
+        "imagebuilderTemplate": "winserver2019",
+        "userIdentity": "enabled"
+      },
+      "identity": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+          "<imgBuilderId>": {}
+        }
+      },
+      "properties": {
+        "buildTimeoutInMinutes": 30,
+        "vmProfile": {
+          "vmSize": "Standard_DS1_v2",
+          "osDiskSizeGB": 100
+        },
+        "source": {
+          "type": "PlatformImage",
+          "publisher": "MicrosoftWindowsServer",
+          "offer": "WindowsServer",
+          "sku": "Windows Server 2019 Datacenter (2019-Datacenter)",
+          "version": "latest"
+        },
+        "customize": [
+          {
+            "type": "PowerShell",
+            "name": "GetApps",
+            "uri": "'https://raw.githubusercontent.com/singhsupriya2819/ImageBuilderScript/main/BaseFunction.ps1?token=AOFPA6BBBZVNUCTLESOO3YTBSKIWY' -OutFile 'c:\\temp\\azcopy.zip'"
+          }
+        ],
+        "distribute": [
+          {
+            "type": "ManagedImage",
+            "imageId": "/subscriptions/<subscriptionID>/resourceGroups/<rgName>/providers/Microsoft.Compute/images/<imageName>",
+            "location": "East US",
+            "artifactTags": {
+              "source": "customImageBuilder",
+              "baseosimg": "Windows Server 2019 Datacenter"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
