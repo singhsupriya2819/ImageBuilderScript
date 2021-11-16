@@ -1,0 +1,17 @@
+{
+    "Name": "Azure Image builder",
+    "IsCustom": true,
+    "Description": "image builder access to create resources for image build",
+    "Actions": [
+        "Microsoft.Compute/images/write",
+        "Microsoft.Compute/images/read",
+        "Microsoft.Compute/images/delete",
+        "Microsoft.Compute/galleries/read",
+        "Microsoft.Compute/galleries/images/read",
+        "Microsoft.Compute/galleries/images/versions/read",
+        "Microsoft.Compute/galleries/images/versions/write"
+    ],
+    "NotActions": [
+        
+    ]
+}
