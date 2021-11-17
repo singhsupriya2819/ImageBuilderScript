@@ -1,5 +1,5 @@
 {
-    "Name": "Azure Image builder",
+    "Name": "AIB-Role",
     "IsCustom": true,
     "Description": "image builder access to create resources for image build",
     "Actions": [
