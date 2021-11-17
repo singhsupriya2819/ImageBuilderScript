@@ -40,14 +40,14 @@
           "type": "PlatformImage",
           "publisher": "MicrosoftWindowsServer",
           "offer": "WindowsServer",
-          "sku": "Windows Server 2019 Datacenter (2019-Datacenter)",
+          "sku": "2019 Datacenter,
           "version": "latest"
         },
         "customize": [
           {
             "type": "PowerShell",
             "name": "GetApps",
-            "uri": "'https://raw.githubusercontent.com/singhsupriya2819/ImageBuilderScript/main/BaseFunction.ps1?token=AOFPA6BBBZVNUCTLESOO3YTBSKIWY' -OutFile 'c:\\temp\\azcopy.zip'"
+            "uri": "https://raw.githubusercontent.com/singhsupriya2819/ImageBuilderScript/main/BaseFunction.ps1?token=AOFPA6BBBZVNUCTLESOO3YTBSKIWY"
           }
         ],
         "distribute": [
