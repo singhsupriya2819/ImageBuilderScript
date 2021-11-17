@@ -13,5 +13,8 @@
     ],
     "NotActions": [
         
+    ],
+    "AssignableScopes": [
+        "/subscriptions/<subscriptionID>/resourceGroups/<rgName>"
     ]
 }
