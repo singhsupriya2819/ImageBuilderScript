@@ -126,6 +126,3 @@ InstallAzCLI
 Install7Zip
 InstallEdgeChromium
 DisableShutDownEventPopUp
-
-
-
