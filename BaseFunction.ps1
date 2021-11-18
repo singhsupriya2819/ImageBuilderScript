@@ -83,7 +83,7 @@ Function Install7Zip
 
 }
 
-#Function 12
+#Function 11
 Function InstallEdgeChromium
 {
 
@@ -96,7 +96,7 @@ Function InstallEdgeChromium
     $Shortcut.Save()
 
 }
-#Function 13   
+#Function 12   
 Function DisableShutDownEventPopUp   
 {
     New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\" -Name "Reliability" –Force
@@ -123,8 +123,9 @@ CreateLabFilesDirectory
 Show-File-Extension
 InstallAzPowerShellModule
 InstallAzCLI
-InstallGoogleChrome
 Install7Zip
 InstallEdgeChromium
+DisableShutDownEventPopUp
+
 
 
