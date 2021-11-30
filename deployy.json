@@ -1,0 +1,147 @@
+#Set the subscription to be used in current session
+Set-AzContext -Subscription "03cb4166-a8bc-4ae7-b440-e4ecc6c04126"
+
+#Register Resource Providers
+Get-AzResourceProvider -ProviderNamespace Microsoft.Compute, Microsoft.KeyVault, Microsoft.Storage, Microsoft.VirtualMachineImages, Microsoft.Network |
+Where-Object RegistrationState -ne Registered |
+Register-AzResourceProvider
+
+
+#Set up base variables and create Resource group
+# Destination image resource group name
+$imageResourceGroup = 'CustomAIB-RG'
+
+# Azure region
+$location = 'West US'
+
+# Name of the image to be created
+$imageTemplateName = 'CloudlabsCustomImage-Template'
+
+# Distribution properties of the managed image upon completion
+$runOutputName = 'CloudlabsCustomScript-Output'
+
+# Your Azure Subscription ID
+$subscriptionID = (Get-AzContext).Subscription.Id
+Write-Output $subscriptionID
+
+New-AzResourceGroup -Name $imageResourceGroup -Location $location
+
+
+
+
+#Install and Import Az.ManagedServiceIdentity & Az.ImageBuilder modules
+Install-Module -Name Az.ManagedServiceIdentity -Scope CurrentUser
+Install-Module -Name Az.ImageBuilder -Scope CurrentUser
+
+#Import-Module -Name Az.ManagedServiceIdentity
+#Import-Module -Name Az.ImageBuilder
+
+
+
+
+
+
+#Create Managed Identity
+[int]$timeInt = $(Get-Date -UFormat '%s')
+$imageRoleDefName = "CloudlabsAIBRoles$timeInt"
+$identityName = "CloudlabsCustom-Identity$timeInt"
+
+New-AzUserAssignedIdentity -ResourceGroupName $imageResourceGroup -Name $identityName
+$identityNameResourceId = (Get-AzUserAssignedIdentity -ResourceGroupName $imageResourceGroup -Name $identityName).Id
+$identityNamePrincipalId = (Get-AzUserAssignedIdentity -ResourceGroupName $imageResourceGroup -Name $identityName).PrincipalId
+
+
+
+#Create Custom Role definition
+$CustomRoleImageCreationUrl = 'https://raw.githubusercontent.com/singhsupriya2819/ImageBuilderScript/main/RoleImageCreation.json'
+$CustomRoleImageCreationPath = "$env:TEMP\CustomRoleImageCreation.json"
+
+
+#download a .json file with settings, update with subscription settings
+Invoke-WebRequest -Uri $CustomRoleImageCreationUrl -OutFile $CustomRoleImageCreationPath -UseBasicParsing
+
+
+$Content = Get-Content -Path $CustomRoleImageCreationPath -Raw
+$Content = $Content -replace '<subscriptionID>', $subscriptionID
+$Content = $Content -replace '<rgName>', $imageResourceGroup
+$Content = $Content -replace 'AIB-Role', $imageRoleDefName
+$Content | Out-File -FilePath $CustomRoleImageCreationPath -Force
+
+
+#Create custom role in azure RBAC 
+New-AzRoleDefinition -InputFile $CustomRoleImageCreationPath
+$RoleAssignParams = @{
+ObjectId = $identityNamePrincipalId
+RoleDefinitionName = $imageRoleDefName
+Scope = "/subscriptions/$subscriptionID/resourceGroups/$imageResourceGroup"
+}
+New-AzRoleAssignment @RoleAssignParams
+
+
+#Create shared image gallery
+$myGalleryName = 'CloudlabsCustomImagesGallery'
+$imageDefName = 'CloudlabsImageDef'
+
+
+New-AzGallery -GalleryName $myGalleryName -ResourceGroupName $imageResourceGroup -Location $location
+
+
+#Create shared image gallery defination
+$GalleryParams = @{
+GalleryName = $myGalleryName
+ResourceGroupName = $imageResourceGroup
+Location = $location
+Name = $imageDefName
+OsState = 'specialized'
+OsType = 'Windows'
+Publisher = 'myCo'
+Offer = 'Windows'
+Sku = 'Win2019'
+}
+New-AzGalleryImageDefinition @GalleryParams
+
+
+#Create source object defining the Base OS type
+$SrcObjParams = @{
+SourceTypePlatformImage = $true
+Publisher = 'MicrosoftWindowsServer'
+Offer = 'WindowsServer'
+Sku = '2019-Datacenter'
+Version = 'latest'
+}
+$srcPlatform = New-AzImageBuilderSourceObject @SrcObjParams
+
+
+#Create distribution object
+$disObjParams = @{
+SharedImageDistributor = $true
+ArtifactTag = @{tag='dis-share'}
+GalleryImageId = "/subscriptions/$subscriptionID/resourceGroups/$imageResourceGroup/providers/Microsoft.Compute/galleries/$myGalleryName/images/$imageDefName"
+ReplicationRegion = $location
+RunOutputName = $runOutputName
+ExcludeFromLatest = $false
+}
+$disSharedImg = New-AzImageBuilderDistributorObject @disObjParams
+
+
+#Create customizer object
+#$customizer = New-AzImageBuilderCustomizerObject -PowerShellCustomizer -CustomizerName RunningCloudlabsScripts -RunElevated $false -ScriptUri "https://cloudlabsscriptstorage.blob.core.windows.net/clouldlabssriptcontainer/CloudlabsImageConfigScript.ps1?sp=r&st=2021-11-24T06:08:11Z&se=2024-12-31T14:08:11Z&spr=https&sv=2020-08-04&sr=b&sig=KPxd3HR9QbVDDhhWz3KyNquoPoBY6wwDCfAFMVA86QM%3D"
+#https://imagestorageforcloudlabs.blob.core.windows.net/customscript/CloudlabsImageConfigurationScript.ps1?sp=r&st=2021-11-30T15:46:16Z&se=2024-12-30T23:46:16Z&spr=https&sv=2020-08-04&sr=b&sig=b3CbWLZChz6%2F8Pjh3TKxbR3Bq%2B6Nnp5uvglS5g%2Fdgis%3D
+$customizer = New-AzImageBuilderCustomizerObject -PowerShellCustomizer -CustomizerName RunningCloudlabsScripts -RunElevated $false -ScriptUri "https://imagestorageforcloudlabs.blob.core.windows.net/customscript/CloudlabsImageConfigurationScript.ps1?sp=r&st=2021-11-30T15:46:16Z&se=2024-12-30T23:46:16Z&spr=https&sv=2020-08-04&sr=b&sig=b3CbWLZChz6%2F8Pjh3TKxbR3Bq%2B6Nnp5uvglS5g%2Fdgis%3D"
+
+#create image-builder template
+$ImgTemplateParams = @{
+ImageTemplateName = $imageTemplateName
+ResourceGroupName = $imageResourceGroup
+Source = $srcPlatform
+Distribute = $disSharedImg
+Customize = $customizer
+Location = $location
+UserAssignedIdentityId = $identityNameResourceId
+}
+New-AzImageBuilderTemplate @ImgTemplateParams
+
+#Start build process
+Start-AzImageBuilderTemplate -ResourceGroupName $imageResourceGroup -Name $imageTemplateName
+
+#Get-AzImageBuilderTemplate -ImageTemplateName  $imageTemplateName -ResourceGroupName $imageResourceGroup | Select-Object ProvisioningState, ProvisioningErrorMessage  
