@@ -1,0 +1,80 @@
+trigger:
+  branches:
+    include:
+    - "*"
+  paths:
+    include:
+    - "ImageBuilder/*"  
+  tags:
+    include:
+    - v*
+
+resources:
+- repo: self
+
+variables:
+
+  #- group: dev-shared
+
+  # We conditionally use a variable group depending on which environment we're deploying to.
+  # Unfortunately the "conditional insertion" syntax used below doesn't produce
+  # well-formed YAML. This means that your IDE is going to yell at you about
+  # this, but don't worry, the syntax is correct.
+
+  # Also, the syntax 1.2.3.4 (notice there are no quotes) is a version literal
+  # in pipeline expressions.  Comparison functions, like `le`, convert the right
+  # parameter to match the type of the left parameter. When conversion fails,
+  # the comparison function returns false. This gives us a hacky way of ensuring
+  # that the tag is a proper version ID and not a pre-release version. If the
+  # comparison returns false, we know that the tag isn't a proper version
+  # string, because it can't be converted to a version literal.
+
+  - ${{ if and(startsWith(variables['Build.SourceBranch'], 'refs/tags/v'), le(0.0.0, replace(variables['Build.SourceBranch'], 'refs/tags/v', ''))) }}:
+    - group: prod
+    - name: releaseVersion
+      # doing replace on the prefix from Build.SourceBranch is safer than doing
+      # it on Build.SourceBranchName, as the replace function replaces _all_
+      # occurrences of the pattern string
+      value: ${{ replace(variables['Build.SourceBranch'], 'refs/tags/v', '') }}
+
+  - ${{ if and(not(startsWith(variables['Build.SourceBranch'], 'refs/tags/v')), eq(variables['Build.SourceBranchName'], 'main')) }}:
+    - group: staging
+
+  ##########################################################
+  ############### DEV SPECIFIC ENVIRONMENTS ################
+  ##########################################################
+
+  # Replace the branch name that corresponds to your variable group to the
+  # topic branch on which you're currently working, and pushes to that topic
+  # branch will automatically be deployed to your own dev environment.
+
+  # There's no need to or together multiple branches, as only the config from
+  # your current branch will be evaluated in the conditionals below
+
+
+  - ${{ if startsWith(variables['Build.SourceBranchName'], 'azure-pipelines-dev') }}:
+    - group: azure-pipelines-dev
+
+  # Agent VM image name
+  - name: vmImageName
+    value: Windows Server 2019
+  # Prod Pipeline Environment which needs approval
+  - name: prodEnvironment
+    value: azure-pipelines-dev
+
+stages
+- stage: CreateNewImage
+  displayName: Create New Image
+  jobs:
+  - job: RunImageBUild
+    displayName: Start an Image Builder Build
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - task: AzureCLI@2
+      name: StartBuild
+      displayName: Start the Build
+      inputs:
+        azureSubscription: $(serviceConnection)
+        scriptType: powershell
+        scriptLocation: "https://imagestorageforcloudlabs.blob.core.windows.net/customscript/CloudlabsImageConfigScript.ps1?sp=r&st=2021-11-24T09:57:05Z&se=2024-12-31T17:57:05Z&spr=https&sv=2020-08-04&sr=b&sig=DCAvTStPhic7NxG721z3LYgeH7CeucbCemf8Ast9nfs%3D"
